@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+       Copyright 2010-2022 the original author or authors.
+
+       Licensed under the Apache License, Version 2.0 (the "License");
+       you may not use this file except in compliance with the License.
+       You may obtain a copy of the License at
+
+          https://www.apache.org/licenses/LICENSE-2.0
+
+       Unless required by applicable law or agreed to in writing, software
+       distributed under the License is distributed on an "AS IS" BASIS,
+       WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+       See the License for the specific language governing permissions and
+       limitations under the License.
+
+-->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.mybatis.jpetstore.mapper.DiaryMapper">
+
+    <cache />
+
+    <select id="getDiaryContent" resultType="Diary">
+        select no, imgurl, title, categoryid, userid, date, content,likes, comments
+        from DIARY where no = #{no};
+    </select>
+
+    <insert id="insertDiary" parameterType="Diary" useGeneratedKeys="true" keyProperty="no">
+        insert into DIARY (userid, title, content, categoryid, imgurl)
+        VALUES (#{userid}, #{title}, #{content}, #{categoryid}, #{imgurl});
+    </insert>
+
+    <update id="updateDiary" parameterType="Diary">
+        update DIARY set title = #{title}, content = #{content}, imgurl = #{imgurl} where no = #{no};
+    </update>
+
+    <delete id="deleteDiary" parameterType="int">
+        delete from DIARY where no = #{no};
+    </delete>
+
+    <select id="getDiaryList" resultType="Diary">
+        select no, imgurl, title, categoryid, userid, date, likes, comments
+        from DIARY
+        where 1 = 1
+        <if test='param2 != null and param2 != "ALL"'>
+            and categoryid = #{param2}
+        </if>
+        <if test="param4 != null">
+            and (userid like CONCAT('%',#{param4},'%') OR title like CONCAT('%',#{param4},'%'))
+        </if>
+        order by ${param3} desc limit #{param1}, 6;
+    </select>
+
+    <select id="getCategoriedDiaryList" resultType="Diary">
+        select no, imgurl, title, categoryid, userid, date, likes, comments
+        from DIARY
+        order by ${param3} desc limit #{param1}, 6;
+    </select>
+
+    <select id="getDiaryCount" resultType="int">
+        select count(*) from DIARY
+        where 1 = 1
+        <if test='param1 != null and param2 != "ALL"'>
+            and categoryid = #{param1}
+        </if>
+        <if test="param2 != null">
+            and (userid like CONCAT('%',#{param2},'%') OR title like CONCAT('%',#{param2},'%'))
+        </if>
+        ;
+    </select>
+
+    <update id="updateDiaryLikes" parameterType="int">
+        update DIARY set likes = #{param2} where no = #{param1};
+    </update>
+
+    <update id="updateDiaryComments" parameterType="int">
+        update DIARY set comments = #{param2} where no = #{param1};
+    </update>
+
+    <select id="getDiaryUser" resultType="String">
+        select userid from DIARY where no = #{no};
+    </select>
+
+    <select id="getDiaryCountByUserid" resultType="int">
+        select count(*) from DIARY where userid = #{userid}
+    </select>
+
+    <select id="getDiaryListByUserid" resultType="Diary">
+        select no, imgurl, title, categoryid, userid, date, likes, comments
+        from DIARY
+        where userid = #{param1}
+        order by date desc limit #{param2}, 5;
+    </select>
+
+    <select id="getLatestMyDiaryNo" resultType="int" parameterType="String">
+        select no from DIARY where userid = #{userid} order by no desc limit 0, 1;
+    </select>
+
+    <select id="getFilename" resultType="String">
+        select imgurl from DIARY where no = #{no};
+    </select>
+    <select id="doesDiaryExist" parameterType="int" resultType="int">
+        select exists(select * from DIARY where no=#{no})
+    </select>
+</mapper>
